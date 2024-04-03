@@ -3,29 +3,40 @@ package com.example.twoactivities
 import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
+import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.*
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
+import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
-import androidx.test.espresso.intent.matcher.IntentMatchers.toPackage
-import androidx.test.espresso.intent.rule.IntentsTestRule
-import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withHint
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.not
-import org.junit.Rule
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class ExampleInstrumentedTest {
 
-    @get:Rule
-    val activityRule = IntentsTestRule(MainActivity::class.java)
+    private var activityScenario: ActivityScenario<MainActivity>? = null
+
+    @Before
+    fun setUp() {
+        activityScenario = ActivityScenario.launch(MainActivity::class.java)
+    }
 
     @Test
     fun editTextHintTest() {
@@ -38,27 +49,32 @@ class ExampleInstrumentedTest {
     }
 
 
-    private fun performSendMessage(message : String){
+    private fun performSendMessage(message: String) {
         onView(withId(R.id.editText_main)).perform(typeText(message), closeSoftKeyboard())
         onView(withId(R.id.button_main)).perform(click())
     }
 
     @Test
     fun sendMessageTest() {
-        val message = "Hy"
+        withIntents {
+            val message = "Hy"
 
-        performSendMessage(message)
+            performSendMessage(message)
 
-        intended(allOf(
-                hasExtra(MainActivity.EXTRA_MESSAGE, message)))
+            intended(
+                allOf(
+                    hasExtra(MainActivity.EXTRA_MESSAGE, message)
+                )
+            )
 
-        onView(withId(R.id.text_message)).check(matches(withText(message)))
+            onView(withId(R.id.text_message)).check(matches(withText(message)))
+        }
     }
 
     @Test
     fun replyMessageTest() {
         val message = "Hy"
-        val reply  = "There"
+        val reply = "There"
 
         performSendMessage(message)
 
@@ -70,17 +86,25 @@ class ExampleInstrumentedTest {
 
     @Test
     fun replyStubMessageTest() {
-        val message = "Hy"
-        val reply  = "There"
+        withIntents {
+            val message = "Hy"
+            val reply = "There"
 
-        val resultData = Intent()
-        resultData.putExtra(SecondActivity.EXTRA_REPLY, reply)
-        val result = Instrumentation.ActivityResult(Activity.RESULT_OK, resultData)
+            val resultData = Intent()
+            resultData.putExtra(SecondActivity.EXTRA_REPLY, reply)
+            val result = Instrumentation.ActivityResult(Activity.RESULT_OK, resultData)
 
-        intending(toPackage(activityRule.activity.packageName)).respondWith(result)
+            intending(hasComponent(SecondActivity::class.java.name)).respondWith(result)
 
-        performSendMessage(message)
+            performSendMessage(message)
 
-        onView(withId(R.id.text_message_reply)).check(matches(withText(reply)))
+            onView(withId(R.id.text_message_reply)).check(matches(withText(reply)))
+        }
+    }
+
+    private fun withIntents(content: () -> Unit) {
+        Intents.init()
+        content()
+        Intents.release()
     }
 }

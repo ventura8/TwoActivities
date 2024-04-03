@@ -1,13 +1,16 @@
 package com.example.twoactivities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,12 +20,14 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE =
             "com.example.twoactivities.extra.MESSAGE";
 
-    private EditText mMessageEditText;
-
     public static final int TEXT_REQUEST = 1;
+
+    private EditText mMessageEditText;
 
     private TextView mReplyHeadTextView;
     private TextView mReplyTextView;
+
+    private ActivityResultLauncher<Intent> secondActivityResultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,5 +60,32 @@ public class MainActivity extends AppCompatActivity {
                 mReplyTextView.setVisibility(View.VISIBLE);
             }
         }
+    }
+
+    /**
+     *  Call this method on onCreate to register launcher
+     */
+    public void registerLauncherForActivityResult(){
+        secondActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == Activity.RESULT_OK) {
+                Intent data = result.getData();
+                String reply =
+                        data.getStringExtra(SecondActivity.EXTRA_REPLY);
+                mReplyHeadTextView.setVisibility(View.VISIBLE);
+                mReplyTextView.setText(reply);
+                mReplyTextView.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
+    /**
+     * Call this when launching second activity
+     */
+    public void modernLaunchSecondActivity(){
+        Log.d(LOG_TAG, "Button clicked!");
+        Intent intent = new Intent(this, SecondActivity.class);
+        String message = mMessageEditText.getText().toString();
+        intent.putExtra(EXTRA_MESSAGE, message);
+        secondActivityResultLauncher.launch(intent);
     }
 }

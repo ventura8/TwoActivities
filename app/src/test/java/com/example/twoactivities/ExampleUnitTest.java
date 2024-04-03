@@ -1,10 +1,8 @@
 package com.example.twoactivities;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
-
-import java.util.Stack;
-
-import static org.junit.Assert.*;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -17,7 +15,7 @@ public class ExampleUnitTest {
     public void addition_isCorrect() {
 
         Math math = new Math();
-        int sum = math.addition(3,2);
+        int sum = math.addition(3, 2);
         assertEquals(5, sum);
     }
 
@@ -25,7 +23,7 @@ public class ExampleUnitTest {
     public void substraction_isCorrect() {
 
         Math math = new Math();
-        int sum = math.subtraction(2,2);
+        int sum = math.subtraction(2, 2);
         assertEquals(0, sum);
     }
 
@@ -33,7 +31,7 @@ public class ExampleUnitTest {
     public void multiply_isCorrect() {
 
         Math math = new Math();
-        int result = math.multiply(2,2);
+        int result = math.multiply(2, 2);
         assertEquals(4, result);
     }
 
@@ -41,7 +39,7 @@ public class ExampleUnitTest {
     public void div_isCorrect() {
 
         Math math = new Math();
-        float result = math.div(4,2);
+        float result = math.div(4, 2);
         assertEquals(2f, result, 0f);
     }
 }
